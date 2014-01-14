@@ -36,7 +36,7 @@
 #include <float.h>
 #include <dfpmacro.h>
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN
 #  define END_FIX(i)	i
 #else
 #  define END_FIX(i)	(_DECIMAL_SIZE/8 - 1 - i)

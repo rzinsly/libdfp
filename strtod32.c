@@ -328,9 +328,6 @@ FUNCTION_L_INTERNAL (const STRING_TYPE * nptr, STRING_TYPE ** endptr,
   /* Numbers starting `0X' or `0x' have to be processed with base 16.  */
   int base = 10;
 
-  /* Number of bits currently in result value.  */
-  int bits;
-
   /* Running pointer after the last character processed in the string.  */
   const STRING_TYPE *cp, *tp;
   /* Start of significant part of the number.  */
@@ -415,7 +412,6 @@ FUNCTION_L_INTERNAL (const STRING_TYPE * nptr, STRING_TYPE ** endptr,
   /* Prepare number representation.  */
   exponent = 0;
   negative = 0;
-  bits = 0;
 
   /* Parse string to get maximal legal prefix.  We need the number of
      characters of the integer part, the fractional part and the exponent.  */
@@ -489,6 +485,7 @@ FUNCTION_L_INTERNAL (const STRING_TYPE * nptr, STRING_TYPE ** endptr,
 		/* The closing brace is missing.  Only match the NAN
 		   part.  */
 		cp = startp;
+#if 0
 	      else
 		{
 		  /* This is a system-dependent way to specify the
@@ -504,6 +501,7 @@ FUNCTION_L_INTERNAL (const STRING_TYPE * nptr, STRING_TYPE ** endptr,
 		      SET_MANTISSA (retval, mant);
 		    }
 		}
+#endif
 	    }
 
 	  if (endptr != NULL)

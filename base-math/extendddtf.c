@@ -39,7 +39,7 @@ extern _Decimal64 __extenddfdd (double);
 
 CONVERT_WRAPPER(
 // extendddtf, trunctdtf
-	double df_part1, df_part2;
+	volatile double df_part1, df_part2;
 	SRC_TYPE dd_part1, dd_part2;
 
 	df_part1 = a;			/* TD -> DF  */

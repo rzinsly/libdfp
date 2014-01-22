@@ -38,7 +38,7 @@ extern _Decimal32 __truncdfsd (double);
 #include "convert.h"
 
 CONVERT_WRAPPER(
-	double df_part1, df_part2;
+	volatile double df_part1, df_part2;
 	_Decimal32 sd_part1, sd_part2;
 
 	df_part1 = a;			/* TD -> DF  */

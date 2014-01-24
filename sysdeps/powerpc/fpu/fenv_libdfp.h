@@ -32,7 +32,7 @@
 typedef union
 {
   fenv_t fenv;
-  unsigned int l[2];
+  unsigned long long l;
 } fenv_union_t;
 
 # define fegetenv_register() \

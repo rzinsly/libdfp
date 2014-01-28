@@ -270,7 +270,7 @@ main (int argc, char *argv[])
   int numinputs;
   FILE *inputfile;
   char inputfilename[] = "amort.input";
-  char *argv_option;
+  const char *argv_option;
 
   table = (tabletype *) malloc (30 * 12 * sizeof (tabletype));
   //printf ("table@%p for %d bytes\n", table, (30 * 12 * sizeof (tabletype)));

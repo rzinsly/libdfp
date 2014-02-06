@@ -148,12 +148,12 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
   /* Variables needed are uswork, uiwork, etc. [so do not use at same */
   /* level in an expression, e.g., UBTOUI(x)==UBTOUI(y) may fail].    */
 
-  #ifdef DECLITEND
-  # define BSWAP16(x) __builtin_bswap16 (x)
-  # define BSWAP32(x) __builtin_bswap32 (x)
+  #if DECLITEND==1
+  # define BSWAP16(x) (__builtin_bswap16 (x))
+  # define BSWAP32(x) (__builtin_bswap32 (x))
   #else
-  # define BSWAP16(x)
-  # define BSWAP32(x)
+  # define BSWAP16(x) (x)
+  # define BSWAP32(x) (x)
   #endif
 
   /* Return a uInt, etc., from bytes starting at a char* or uByte*    */

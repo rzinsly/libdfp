@@ -144,7 +144,7 @@ main (void)
   for (i = 0; i < d32_llquantexp_size; ++i)
     {
       long long int r = llquantexpd32 (d32_llquantexp[i].x);
-      printf ("llquantexp (%.9HgDF) = %5lld) in %s:%d\n", d32_llquantexp[i].x,
+      printf ("llquantexp (%.9HgDF) = %lld) in %s:%d\n", d32_llquantexp[i].x,
 	      r, __FILE__, __LINE__ - 1);
       _VC_P (__FILE__, d32_llquantexp[i].line, d32_llquantexp[i].e, r,
 	     d32_llquantexp[i].f);

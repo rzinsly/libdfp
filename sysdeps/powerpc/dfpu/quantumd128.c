@@ -26,8 +26,8 @@ _Decimal128 __quantumd128 (_Decimal128 x)
 {
   register _Decimal128 input asm("fr0") = x;
   _Decimal128 ret;
-  asm ("dxexq   %0,%0\n"
-       "dcffixq %1,%0\n"
+  asm ("dxexq   %0,%1\n"
+       "dcffixq %0,%0\n"
     : "=f"(ret) :
       "f"(input));
   if (ret == -1.0DL)

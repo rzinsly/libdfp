@@ -121,7 +121,7 @@ main (void)
   for (i = 0; i < d128_quantum_size; ++i)
     {
       _Decimal128 r = quantumd128 (d128_quantum[i].x);
-      printf ("quantum (%.34DDfDL) = %.34DDfDL) in %s:%d\n", d128_quantum[i].x, r,
+      printf ("quantum (%.34DDgDL) = %.34DDgDL) in %s:%d\n", d128_quantum[i].x, r,
 	      __FILE__, __LINE__ - 1);
       _VC_P (__FILE__, d128_quantum[i].line, d128_quantum[i].e, r,
 	     d128_quantum[i].f);
@@ -131,7 +131,7 @@ main (void)
   for (i = 0; i < d64_quantum_size; ++i)
     {
       _Decimal64 r = quantumd64 (d64_quantum[i].x);
-      printf ("quantum (%.16DfDD) = %.16DfDD) in %s:%d\n", d64_quantum[i].x, r,
+      printf ("quantum (%.16DgDD) = %.16DgDD) in %s:%d\n", d64_quantum[i].x, r,
 	      __FILE__, __LINE__ - 1);
       _VC_P (__FILE__, d64_quantum[i].line, d64_quantum[i].e, r,
 	     d64_quantum[i].f);
@@ -141,7 +141,7 @@ main (void)
   for (i = 0; i < d32_quantum_size; ++i)
     {
       _Decimal32 r = quantumd32 (d32_quantum[i].x);
-      printf ("quantum (%.9HfDF) = %.9HfDF) in %s:%d\n", d32_quantum[i].x, r,
+      printf ("quantum (%.9HgDF) = %.9HgDF) in %s:%d\n", d32_quantum[i].x, r,
 	      __FILE__, __LINE__ - 1);
       _VC_P (__FILE__, d32_quantum[i].line, d32_quantum[i].e, r,
 	     d32_quantum[i].f);

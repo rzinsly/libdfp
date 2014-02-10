@@ -1,4 +1,4 @@
-/* _Decimal32 quantumd64 implementation.
+/* _Decimal64 quantumd64 implementation.
 
    Copyright (C) 2014 Free Software Foundation, Inc.
 
@@ -25,8 +25,8 @@
 _Decimal64 __quantumd64 (_Decimal64 x)
 {
   _Decimal64 ret;
-  asm ("dxex    %0,%0\n"
-       "dcffix  %1,%0\n"
+  asm ("dxex    %0,%1\n"
+       "dcffix  %0,%0\n"
     : "=f"(ret) :
       "f"(x));
   if (ret == -1.0DD)

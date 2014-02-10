@@ -25,8 +25,8 @@
 _Decimal32 __quantumd32 (_Decimal32 x)
 {
   _Decimal64 ret;
-  asm ("dxex    %0,%0\n"
-       "dcffix  %1,%0\n"
+  asm ("dxex    %0,%1\n"
+       "dcffix  %0,%0\n"
     : "=f"(ret) :
       "f"((_Decimal64) x));
   if (ret == -1.0DD)

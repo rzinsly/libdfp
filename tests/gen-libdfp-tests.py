@@ -19,6 +19,50 @@ class Function:
   def arg_type (self, i):
     return self.args[i].argtype;
 
+# Descrobes an operation argument
+class OperationArg:
+  SPECIAL_ARGS = {
+    "Inf"     : "plus_infty",
+    "-Inf"    : "minus_infty",
+    "sNaN"    : "snan_value",
+    "NaN"     : "qnan_value"
+  }
+
+  def __init__(self, arg):
+    self.arg = arg
+
+  def parse_arg (self):
+    # sNAN value
+    if self.arg == "sNaN":
+      return ".ieee_nan = {.c = 0x1f,.signaling_nan = 1}"
+    # Infinity or NaN value
+    if self.arg in self.SPECIAL_ARGS:
+      return ".%s = %s" % (DECIMAL.decfield, self.SPECIAL_ARGS[self.arg])
+    # Replace <number>E[+-]DEC_[MAX|MIN]_EXP by a expected number, i.e,
+    # 1E-DEC_MIN_EXP -> 1E-383
+    if "DEC_MAX_EXP" in self.arg:
+       ret = self.arg.replace ("DEC_MAX_EXP", DECIMAL.maxexp) + DECIMAL.suffix
+       return ".%s = %s" % (DECIMAL.decfield, ret)
+    if "DEC_MIN_EXP" in self.arg:
+       ret = self.arg.replace ("DEC_MIN_EXP", DECIMAL.minexp) + DECIMAL.suffix
+       return ".%s = %s" % (DECIMAL.decfield, ret)
+    # Macro fox max, min, tiny values
+    if "DEC_MAX" in self.arg:
+       ret = self.arg.replace ("DEC_MAX", DECIMAL.maxvalue);
+       return ".%s = %s" % (DECIMAL.decfield, ret)
+    if "DEC_MIN" in self.arg:
+       ret = self.arg.replace ("DEC_MIN", DECIMAL.minvalue);
+       return ".%s = %s" % (DECIMAL.decfield, ret)
+    if "DEC_SUBNORMAL_MIN" in self.arg:
+       ret = self.arg.replace ("DEC_SUBNORMAL_MIN", DECIMAL.subnormal);
+       return ".%s = %s" % (DECIMAL.decfield, ret)
+    # Normal value
+    if '.' not in self.arg:
+      if 'E' not in self.arg:
+        return ".%s = %s" % (DECIMAL.decfield, self.arg)
+    ret = self.arg + DECIMAL.suffix
+    return ".%s = %s" % (DECIMAL.decfield, ret)
+  
 
 # Describes an operation to perform
 class Operation:
@@ -53,51 +97,44 @@ DecimalTypes = {
   "decimal32" : Type ("decimal32",
                       "_Decimal32",
                       "32",
-	  	      "DF",
+                      "DF",
                       "sd",
                       "DEC32_MAX",
                       "DEC32_MIN",
                       "DEC32_SUBNORMAL_MIN",
                       "97",
                       "94",
-		      "%.7HgDF",
+                      "%.7HgDF",
                       "union ieee754r_Decimal32"),
 
   "decimal64" : Type ("decimal64",
                       "_Decimal64",
                       "64",
-	              "DD",
+                      "DD",
                       "dd",
                       "DEC64_MAX",
                       "DEC64_MIN",
                       "DEC64_SUBNORMAL_MIN",
                       "385",
                       "382",
-		      "%.16DgDD",
+                      "%.16DgDD",
                       "union ieee754r_Decimal64"),
 
   "decimal128" : Type ("decimal128",
                        "_Decimal128",
                        "128",
-	               "DL",
+                       "DL",
                        "td",
                        "DEC128_MAX",
                        "DEC128_MIN",
                        "DEC128_SUBNORMAL_MIN",
                        "6145",
                        "6142",
-		       "%.34DDgDL",
+                       "%.34DDgDL",
                        "union ieee754r_Decimal128")
 }
 
-decimal = None
-
-
-class Types:
-  def __init__(self, name, printf):
-    self.name = name
-    self.printf = printf
-
+DECIMAL = None
 
 
 def parse_file (filename):
@@ -117,7 +154,7 @@ def parse_file (filename):
       if fields[1].startswith("name"):
         func.name = fields[2]
       if fields[1].startswith("arg"):
-        func.args.append(DecimalTypes[fields[2] + decimal.tname])
+        func.args.append(DecimalTypes[fields[2] + DECIMAL.tname])
       elif fields[1].startswith("ret"):
         func.ret = DecimalTypes[fields[2]]
       i = i + 1
@@ -138,7 +175,7 @@ def parse_file (filename):
 
       op = Operation()
       for oparg in range (0, expected_args):
-	op.args.append(fields[oparg])
+        op.args.append(OperationArg(fields[oparg]))
       op.ret = fields[len(fields)-1]
 
       operations.append(op)
@@ -165,7 +202,6 @@ def print_header ():
   print ("#include \"scaffold.c\"")
 
 
-
 def print_special_ctes ():
   print ("#ifndef DEC_INFINITY")
   print ("# define DEC_INFINITY __builtin_infd32()")
@@ -180,44 +216,6 @@ def print_special_ctes ():
   print ("")
 
 
-SPECIAL_ARGS = {
-  "Inf"     : "plus_infty",
-  "-Inf"    : "minus_infty",
-  "sNaN"    : "snan_value",
-  "NaN"     : "qnan_value"
-}
-
-def handle_arg (arg):
-  # sNAN value
-  if arg == "sNaN":
-    return ".ieee_nan = {.c = 0x1f,.signaling_nan = 1}"
-  # Infinity or NaN value
-  if arg in SPECIAL_ARGS:
-    return ".%s = %s" % (decimal.decfield, SPECIAL_ARGS[arg])
-  # Replace <number>E[+-]DEC_[MAX|MIN]_EXP
-  if "DEC_MAX_EXP" in arg:
-     ret = arg.replace ("DEC_MAX_EXP", decimal.maxexp) + decimal.suffix
-     return ".%s = %s" % (decimal.decfield, ret)
-  if "DEC_MIN_EXP" in arg:
-     ret = arg.replace ("DEC_MIN_EXP", decimal.minexp) + decimal.suffix
-     return ".%s = %s" % (decimal.decfield, ret)
-  # Macro fox max, min, tiny values
-  if "DEC_MAX" in arg:
-     ret = arg.replace ("DEC_MAX", decimal.maxvalue);
-     return ".%s = %s" % (decimal.decfield, ret)
-  if "DEC_MIN" in arg:
-     ret = arg.replace ("DEC_MIN", decimal.minvalue);
-     return ".%s = %s" % (decimal.decfield, ret)
-  if "DEC_SUBNORMAL_MIN" in arg:
-     ret = arg.replace ("DEC_SUBNORMAL_MIN", decimal.subnormal);
-     return ".%s = %s" % (decimal.decfield, ret)
-  # Normal value
-  if '.' not in arg:
-    if 'E' not in arg:
-      return ".%s = %s" % (decimal.decfield, arg)
-  ret = arg + decimal.suffix
-  return ".%s = %s" % (decimal.decfield, ret)
-
 def print_operations (func, operations):
   print ("typedef struct {")
   for i in range(0, len(func.args)):
@@ -229,7 +227,7 @@ def print_operations (func, operations):
   for op in operations:
     print ("  {"),
     for arg in op.args:
-      print ("{ %s }," % handle_arg(arg)),
+      print ("{ %s }," % arg.parse_arg()),
     print (" %s }," % op.ret)
   print ("};")
   print ("static const int operations_size = \
@@ -243,22 +241,22 @@ def print_func_call(func):
   print ("  for (i = 0; i < operations_size; ++i) {")
 
   # ret = function (arg1, ...)
-  print ("    %s ret = %sd%s (" % (func.ret_type(), func.name, decimal.tname)),
+  print ("    %s ret = %sd%s (" % (func.ret_type(), func.name, DECIMAL.tname)),
   for i in range(0, len(func.args)):
-    print ("operations[i].arg%i.%s" % (i, decimal.decfield)),
+    print ("operations[i].arg%i.%s" % (i, DECIMAL.decfield)),
     if i is not len(func.args)-1:
       print (","),
   print (");")
 
   # printf ("function (arg1, ...)")
-  print ("    printf (\"%sd%s (" % (func.name, decimal.tname)),
+  print ("    printf (\"%sd%s (" % (func.name, DECIMAL.tname)),
   for i in range(0, len(func.args)):
-    print ("%s" % (decimal.printf)),
+    print ("%s" % (DECIMAL.printf)),
     if i is not len(func.args)-1:
       print (","),
   print (") = %s\", " % (func.ret_printf())),
   for i in range(0, len(func.args)):
-    print ("operations[i].arg%i.%s" % (i, decimal.decfield)),
+    print ("operations[i].arg%i.%s" % (i, DECIMAL.decfield)),
     if i is not len(func.args)-1:
       print (","),
   print (", ret);")
@@ -289,16 +287,16 @@ if __name__ == "__main__":
   parser.add_option ("-f", "--file", dest="filename",
                      help="white output to FILE")
   parser.add_option ("-t", "--type", dest="dectype",
-                     help="decimal type to use")
+                     help="DECIMAL type to use")
   (options, args) = parser.parse_args()
 
   if not args:
     print ("usage: %s <options> <input file>" % argv[0])
     exit (0)
   if not options.dectype:
-    print ("error: you must specify a decimal type: 32, 64 or 128")
+    print ("error: you must specify a DECIMAL type: 32, 64 or 128")
     exit (0)
 
-  decimal = DecimalTypes[options.dectype]
+  DECIMAL = DecimalTypes[options.dectype]
 
   print_output (args[0])

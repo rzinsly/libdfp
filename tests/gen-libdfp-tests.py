@@ -31,9 +31,10 @@ class Function:
 
 # Describes an operation to perform
 class Operation:
-  def __init__(self):
+  def __init__(self, line):
     self.args = []
     self.ret = None
+    self.line = line
 
 class Type:
   def __init__(self, name, type, tname = "", suffix = "", decfield = "",
@@ -186,6 +187,7 @@ def parse_file (filename):
     operations = []
     expected_args = len (func.args)
     for l in range(i, len(lines)):
+      i = i + 1
       if not lines[l].strip():
         continue
       
@@ -202,7 +204,7 @@ def parse_file (filename):
 	if DECIMAL.name not in declist:
           continue
 
-      op = Operation()
+      op = Operation(i)
       for oparg in range (0, expected_args):
         op.args.append(fields[oparg])
       op.ret = fields[expected_args]
@@ -248,6 +250,7 @@ def print_operations (func, operations):
   for i in range(0, len(func.args)):
     print ("  %s arg%i;" % (func.arg_type(i), i))
   print ("  %s e;" % func.ret_init_type())
+  print ("  int line;")
   print ("} operations_t;")
   print ("")
   print ("static const operations_t operations[] = {")
@@ -255,7 +258,8 @@ def print_operations (func, operations):
     print ("  {"),
     for i in range(0, len(op.args)):
       print ("%s," % func.args[i].parse_arg(op.args[i])),
-    print (" %s }," % func.ret.parse_arg(op.ret))
+    print (" %s, " % func.ret.parse_arg(op.ret))
+    print (" %d }," % op.line)
   print ("};")
   print ("static const int operations_size = \
     sizeof(operations)/sizeof(operations[0]);");
@@ -289,8 +293,9 @@ def print_func_call(func):
   print (", ret);")
 
   # _VC_P(f,l,x,y,fmt)
-  print ("    _VC_P (__FILE__, __LINE__, operations[i].e%s, ret, \"%s\");" % \
-          (func.ret_field(), func.ret_printf()));
+  print ("    _VC_P (__FILE__, operations[i].line, " 
+         "operations[i].e%s, ret, \"%s\");" % \
+         (func.ret_field(), func.ret_printf()));
 
   print ("  }")
   print ("")

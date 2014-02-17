@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import re
 from optparse import OptionParser
 
 # Decribes the evaluated function
@@ -64,6 +65,9 @@ class BoolType(Type):
     return arg;
 
 class DecimalType(Type):
+  # Regular expression to check for integer numbers and DEC[32|64|128]_[MAX|MIN]
+  intnum_re = re.compile("(-?[0-9]+$)|(-?DEC.*_(MAX|MIN))")
+
   SPECIAL_ARGS = {
     "Inf"     : "plus_infty",
     "-Inf"    : "minus_infty",
@@ -83,33 +87,20 @@ class DecimalType(Type):
     # Replace <number>E[+-]DEC_[MAX|MIN]_EXP by a expected number, i.e,
     # 1E-DEC_MIN_EXP -> 1E-383
     if "DEC_MAX_EXP" in arg:
-       ret = arg.replace ("DEC_MAX_EXP", DECIMAL.maxexp)
-       if '.' not in arg:
-         if 'E' not in arg:
-           ret += DECIMAL.suffix
-       return "{ .%s = %s }" % (DECIMAL.decfield, ret)
+      arg = arg.replace ("DEC_MAX_EXP", DECIMAL.maxexp)
     if "DEC_MIN_EXP" in arg:
-       ret = arg.replace ("DEC_MIN_EXP", DECIMAL.minexp)
-       if '.' not in arg:
-         if 'E' not in arg:
-           ret += DECIMAL.suffix
-       return "{ .%s = %s }" % (DECIMAL.decfield, ret)
+      arg = arg.replace ("DEC_MIN_EXP", DECIMAL.minexp)
     # Macro fox max, min, tiny values
     if "DEC_MAX" in arg:
-       ret = arg.replace ("DEC_MAX", DECIMAL.maxvalue);
-       return "{ .%s = %s }" % (DECIMAL.decfield, ret)
+      arg = arg.replace ("DEC_MAX", DECIMAL.maxvalue);
     if "DEC_MIN" in arg:
-       ret = arg.replace ("DEC_MIN", DECIMAL.minvalue);
-       return "{ .%s = %s }" % (DECIMAL.decfield, ret)
+      arg = arg.replace ("DEC_MIN", DECIMAL.minvalue);
     if "DEC_SUBNORMAL_MIN" in arg:
-       ret = arg.replace ("DEC_SUBNORMAL_MIN", DECIMAL.subnormal);
-       return "{ .%s = %s }" % (DECIMAL.decfield, ret)
+      arg = arg.replace ("DEC_SUBNORMAL_MIN", DECIMAL.subnormal);
     # Normal value
-    if '.' not in arg:
-      if 'E' not in arg:
-        return "{ .%s = %s }" % (DECIMAL.decfield, arg)
-    ret = arg + DECIMAL.suffix
-    return "{ .%s = %s }" % (DECIMAL.decfield, ret)
+    if not self.intnum_re.match (arg):
+      arg += DECIMAL.suffix
+    return "{ .%s = %s }" % (DECIMAL.decfield, arg)
 
 
 DecimalTypes = {
@@ -123,7 +114,7 @@ DecimalTypes = {
                              "DEC32_MAX",
                              "DEC32_MIN",
                              "DEC32_SUBNORMAL_MIN",
-                             "97",
+                             "90",
                              "94",
                              "%.7HgDF",
                              "union ieee754r_Decimal32"),
@@ -136,7 +127,7 @@ DecimalTypes = {
                              "DEC64_MAX",
                              "DEC64_MIN",
                              "DEC64_SUBNORMAL_MIN",
-                             "385",
+                             "369",
                              "382",
                              "%.16DgDD",
                              "union ieee754r_Decimal64"),
@@ -149,7 +140,7 @@ DecimalTypes = {
                               "DEC128_MAX",
                               "DEC128_MIN",
                               "DEC128_SUBNORMAL_MIN",
-                              "6145",
+                              "6111",
                               "6142",
                               "%.34DDgDL",
                               "union ieee754r_Decimal128")
@@ -157,7 +148,15 @@ DecimalTypes = {
 
 DECIMAL = None
 
-
+# Parse the testname.input file returning a set of (Function, Operation)
+# Each file has headers (line starting with '#') describing the test
+# arguments and returns. It follows:
+# '#' name   <testname>
+# '#' arg<N> <type>
+# '#' ret    <type>
+#
+# Each test operation is described by one line:
+# <input> <output> <list of decimal types to apply>
 def parse_file (filename):
   try:
     file = open (filename, "r")
@@ -192,15 +191,21 @@ def parse_file (filename):
       
       fields = lines[l].split()
       # Check if number of arguments is the expected one
-      if len(fields) - 1 is not expected_args:
+      if len(fields) - 1 < expected_args:
         print ("warning: %s:%i: line %s not follow specified function" % \
           (filename, l, lines[l]))
         continue
 
+      # Check if the test applies to decimal type being tested
+      if (len(fields) - 1) > expected_args:
+        declist = fields[expected_args+1].split()
+	if DECIMAL.name not in declist:
+          continue
+
       op = Operation()
       for oparg in range (0, expected_args):
         op.args.append(fields[oparg])
-      op.ret = fields[len(fields)-1]
+      op.ret = fields[expected_args]
 
       operations.append(op)
 
@@ -276,7 +281,7 @@ def print_func_call(func):
     print ("%s" % (DECIMAL.printf)),
     if i is not len(func.args)-1:
       print (","),
-  print (") = %s\", " % (func.ret_printf())),
+  print (") = %s\\n\"," % (func.ret_printf())),
   for i in range(0, len(func.args)):
     print ("operations[i].arg%i.%s" % (i, DECIMAL.decfield)),
     if i is not len(func.args)-1:

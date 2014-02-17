@@ -357,6 +357,27 @@ $(libdfp_cxx_tests): %:%.os $(top_builddir)/$(SHARED_SONAME_LIB)
 $(addsuffix .out,$(libdfp_tests)): %.out:% %.gdb
 	LD_LIBRARY_PATH=$(top_builddir)/:$$LD_LIBRARY_PATH $(top_builddir)/$(patsubst %.out,%,$@) 2> $(top_builddir)/$@ 1> /dev/null
 	@echo
+test-samequantum.out: test-samequantum-d32 test-samequantum-d64 test-samequantum-d128
+	LD_LIBRARY_PATH=$(top_builddir)/:$$LD_LIBRARY_PATH $(top_builddir)/test-samequantum-d32  2>> $(top_builddir)/$@ 1> /dev/null
+	LD_LIBRARY_PATH=$(top_builddir)/:$$LD_LIBRARY_PATH $(top_builddir)/test-samequantum-d64  2>> $(top_builddir)/$@ 1> /dev/null
+	LD_LIBRARY_PATH=$(top_builddir)/:$$LD_LIBRARY_PATH $(top_builddir)/test-samequantum-d128 2>> $(top_builddir)/$@ 1> /dev/null
+	@echo "test-samequantum.out"
+
+$(addsuffix -d32.os, test-samequantum): CFLAGS += -I$(top_srcdir)/tests
+$(addsuffix -d64.os, test-samequantum): CFLAGS += -I$(top_srcdir)/tests
+$(addsuffix -d128.os, test-samequantum): CFLAGS += -I$(top_srcdir)/tests
+test-samequantum-d32: test-samequantum-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-samequantum-d32.c: samequantum.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-samequantum-d64: test-samequantum-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-samequantum-d64.c: samequantum.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-samequantum-d128: test-samequantum-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-samequantum-d128.c: samequantum.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
 
 DISTCLEANFILES = $(top_builddir)/debug-test.conf
 

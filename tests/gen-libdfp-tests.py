@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import *
+import sys
 from optparse import OptionParser
 
 # Decribes the evaluated function
@@ -195,12 +195,11 @@ def print_header ():
   print ("#include <stdio.h>")
   print ("#include <math.h>")
   print ("#include <float.h>")
-  # Include dpd-private for ieee754r_Decimal[32|64|128]
-  print ("#include <dpd-private.h>")
+  print ("#include <endian.h>")
+  print ("#include \"test-common.h\"")
   print ("")
   print ("#define _WANT_VC 1")
   print ("#include \"scaffold.c\"")
-
 
 def print_special_ctes ():
   print ("#ifndef DEC_INFINITY")
@@ -214,7 +213,6 @@ def print_special_ctes ():
   print ("#define   qnan_value     DEC_NAN")
   print ("#define   snan_value     DEC_NAN")
   print ("")
-
 
 def print_operations (func, operations):
   print ("typedef struct {")
@@ -290,11 +288,14 @@ if __name__ == "__main__":
                      help="DECIMAL type to use")
   (options, args) = parser.parse_args()
 
+  if options.filename:
+    sys.stdout = open (options.filename, "w")
+
   if not args:
     print ("usage: %s <options> <input file>" % argv[0])
     exit (0)
   if not options.dectype:
-    print ("error: you must specify a DECIMAL type: 32, 64 or 128")
+    print ("error: you must specify a DECIMAL type: decimal[32|64|128]")
     exit (0)
 
   DECIMAL = DecimalTypes[options.dectype]

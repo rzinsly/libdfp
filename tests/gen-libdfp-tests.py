@@ -36,34 +36,45 @@ class Operation:
     self.ret = None
     self.line = line
 
-class Type:
-  def __init__(self, name, type, tname = "", suffix = "", decfield = "",
-               maxvalue = "", minvalue = "", subnormal = "", maxexp = "",
-               minexp = "", printf = "", argtype = ""):
+# Describe a type handle in operations and functions definition
+class Type (object):
+  def __init__(self, name, type, printf):
     self.name = name
     self.type = type
-    self.tname = tname
-    self.suffix = suffix
-    self.decfield = decfield
-    self.maxvalue = maxvalue
-    self.minvalue = minvalue
-    self.subnormal = subnormal
-    
-    self.minexp = minexp
-    self.maxexp = maxexp
     self.printf = printf
-    if not argtype:
-      self.argtype = type
-    else:
-      self.argtype = argtype
+    self.decfield = ""
+
+  def parse_arg(self, arg):
+    return arg
+
 
 class BoolType(Type):
+  def __init__(self, name, type, printf):
+    super(BoolType, self).__init__(name, type, printf)
+    self.argtype = type
+
   def parse_arg (self, arg):
     if arg == "True":
       return 1
-    elif arg == "False": 
+    elif arg == "False":
       return 0
     return arg;
+
+
+class IntegerType(Type):
+  def __init__(self, name, type, printf):
+    super(IntegerType, self).__init__(name, type, printf)
+    self.argtype = type
+
+  def parse_arg (self, arg):
+    if "DEC_MIN_EXP_SUB" in arg:
+      return arg.replace ("DEC_MIN_EXP_SUB", DECIMAL.minexpsub)
+    if "DEC_MIN_EXP" in arg:
+      return arg.replace ("DEC_MIN_EXP", DECIMAL.minexp)
+    if "DEC_MAX_EXP" in arg:
+      return arg.replace ("DEC_MAX_EXP", DECIMAL.maxexp)
+    return arg
+
 
 class DecimalType(Type):
   # Regular expression to check for integer numbers and DEC[32|64|128]_[MAX|MIN]
@@ -77,6 +88,26 @@ class DecimalType(Type):
     "NaN"     : "qnan_value",
     "-NaN"    : "qnan_value"
   }
+
+  def __init__(self, name, type, tname = "", suffix = "", decfield = "",
+               maxvalue = "", minvalue = "", subnormal = "", maxexp = "",
+               minexp = "", minexpsub = "", printf = "", argtype = ""):
+    super(DecimalType, self).__init__(name, type, printf)
+    self.tname = tname
+    self.suffix = suffix
+    self.decfield = decfield
+    self.maxvalue = maxvalue
+    self.minvalue = minvalue
+    self.subnormal = subnormal
+
+    self.minexp = minexp
+    self.maxexp = maxexp
+    self.minexpsub = minexpsub
+
+    if not argtype:
+      self.argtype = type
+    else:
+      self.argtype = argtype
 
   def parse_arg (self, arg):
     # sNAN value
@@ -107,6 +138,10 @@ class DecimalType(Type):
 DecimalTypes = {
   "bool"      : BoolType ("bool", "_Bool", printf = "%d"),
 
+  "llongint"  : IntegerType("llongint",
+                            "long long int",
+                            printf = "%lli"),
+
   "decimal32" : DecimalType ("decimal32",
                              "_Decimal32",
                              "32",
@@ -117,6 +152,7 @@ DecimalTypes = {
                              "DEC32_SUBNORMAL_MIN",
                              "90",
                              "94",
+                             "101",
                              "%.7HgDF",
                              "union ieee754r_Decimal32"),
 
@@ -130,6 +166,7 @@ DecimalTypes = {
                              "DEC64_SUBNORMAL_MIN",
                              "369",
                              "382",
+                             "398",
                              "%.16DgDD",
                              "union ieee754r_Decimal64"),
 
@@ -143,6 +180,7 @@ DecimalTypes = {
                               "DEC128_SUBNORMAL_MIN",
                               "6111",
                               "6142",
+                              "6176",
                               "%.34DDgDL",
                               "union ieee754r_Decimal128")
 }
@@ -168,7 +206,7 @@ def parse_file (filename):
     func = Function()
 
     for l in range (i, len(lines)):
-      if not lines[l].startswith ("#"):
+      if not lines[l].rstrip().startswith ("#"):
         break
 
       fields = lines[l].split()
@@ -188,9 +226,13 @@ def parse_file (filename):
     expected_args = len (func.args)
     for l in range(i, len(lines)):
       i = i + 1
-      if not lines[l].strip():
+      lines[l] = lines[l].strip()
+      if not lines[l]:
         continue
-      
+      # Ignore commnets
+      if lines[l].startswith ("#"):
+        continue
+
       fields = lines[l].split()
       # Check if number of arguments is the expected one
       if len(fields) - 1 < expected_args:
@@ -258,7 +300,7 @@ def print_operations (func, operations):
     print ("  {"),
     for i in range(0, len(op.args)):
       print ("%s," % func.args[i].parse_arg(op.args[i])),
-    print (" %s, " % func.ret.parse_arg(op.ret))
+    print (" %s, " % func.ret.parse_arg(op.ret)),
     print (" %d }," % op.line)
   print ("};")
   print ("static const int operations_size = \
@@ -293,7 +335,7 @@ def print_func_call(func):
   print (", ret);")
 
   # _VC_P(f,l,x,y,fmt)
-  print ("    _VC_P (__FILE__, operations[i].line, " 
+  print ("    _VC_P (__FILE__, operations[i].line, "
          "operations[i].e%s, ret, \"%s\");" % \
          (func.ret_field(), func.ret_printf()));
 
@@ -303,11 +345,11 @@ def print_func_call(func):
   print ("")
   print ("  return fail;")
   print ("}")
-    
+
 
 def print_output (filename):
   (func, operations) = parse_file (filename)
-  
+
   print_header ()
   print_special_ctes ()
   print_operations (func, operations)

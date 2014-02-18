@@ -138,6 +138,10 @@ class DecimalType(Type):
 DecimalTypes = {
   "bool"      : BoolType ("bool", "_Bool", printf = "%d"),
 
+  "int"       : IntegerType("int",
+                            "int",
+                            printf = "%i"),
+
   "llongint"  : IntegerType("llongint",
                             "long long int",
                             printf = "%lli"),

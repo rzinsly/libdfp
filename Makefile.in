@@ -327,7 +327,8 @@ libdfp_c_tests = test-printf test-param test-amort test-decode test-quantize \
 		 test-llquantexp-d32 test-llquantexp-d64 test-llquantexp-d128 \
 		 test-isnan-d32 test-isnan-d64 test-isnan-d128 \
 		 test-isinf-d32 test-isinf-d64 test-isinf-d128 \
-		 test-isfinite-d32 test-isfinite-d64 test-isfinite-d128
+		 test-isfinite-d32 test-isfinite-d64 test-isfinite-d128 \
+		 test-issignaling-d32 test-issignaling-d64 test-issignaling-d128
 
 libdfp_cxx_tests = test-ostream test-ostream-g-spec test-istream
 
@@ -440,6 +441,19 @@ test-isfinite-d64.c: isfinite.input
 test-isfinite-d128: test-isfinite-d128.os
 	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
 test-isfinite-d128.c: isfinite.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-issignaling-d32: test-issignaling-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-issignaling-d32.c: issignaling.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-issignaling-d64: test-issignaling-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-issignaling-d64.c: issignaling.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-issignaling-d128: test-issignaling-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-issignaling-d128.c: issignaling.input
 	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
 
 DISTCLEANFILES = $(top_builddir)/debug-test.conf

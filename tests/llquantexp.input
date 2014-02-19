@@ -10,7 +10,7 @@ DEC_SUBNORMAL_MIN    -DEC_MIN_EXP_SUB
 # DEC32_MIN_EXP  is -94, but DEC32_MIN is 1E-95DF
 # DEC64_MIN_EXP  is -382, but DEC64_MIN is 1E-383DD
 # DEC128_MIN_EXP is -6142, but DEC32_MIN is 1E-6143DL
-DEC_MIN              -DEC_MIN_EXP-1
+DEC_MIN              -DEC_MIN_EXP
 DEC_MAX              DEC_MAX_EXP
 
 0.1                  -1

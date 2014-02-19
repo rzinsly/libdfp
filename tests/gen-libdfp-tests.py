@@ -142,6 +142,10 @@ DecimalTypes = {
                             "int",
                             printf = "%i"),
 
+  "longint"   : IntegerType("longint",
+                            "long int",
+                            printf = "%li"),
+
   "llongint"  : IntegerType("llongint",
                             "long long int",
                             printf = "%lli"),

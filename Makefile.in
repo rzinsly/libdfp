@@ -330,7 +330,13 @@ libdfp_c_tests = test-printf test-param test-amort test-decode test-quantize \
 		 test-isfinite-d32 test-isfinite-d64 test-isfinite-d128 \
 		 test-issignaling-d32 test-issignaling-d64 test-issignaling-d128 \
 		 test-ilogb-d32 test-ilogb-d64 test-ilogb-d128 \
-		 test-llogb-d32 test-llogb-d64 test-llogb-d128
+		 test-llogb-d32 test-llogb-d64 test-llogb-d128 \
+		 test-ceil-d32 test-ceil-d64 test-ceil-d128 \
+		 test-floor-d32 test-floor-d64 test-floor-d128 \
+		 test-nearbyint-d32 test-nearbyint-d64 test-nearbyint-d128 \
+		 test-round-d32 test-round-d64 test-round-d128 \
+		 test-roundeven-d32 test-roundeven-d64 test-roundeven-d128 \
+		 test-trunc-d32 test-trunc-d64 test-trunc-d128
 
 libdfp_cxx_tests = test-ostream test-ostream-g-spec test-istream
 
@@ -495,6 +501,84 @@ test-ilogdb-d64.c: ilogdb.input
 test-ilogdb-d128: test-ilogdb-d128.os
 	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
 test-ilogdb-d128.c: ilogdb.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-ceil-d32: test-ceil-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-ceil-d32.c: ceil.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-ceil-d64: test-ceil-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-ceil-d64.c: ceil.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-ceil-d128: test-ceil-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-ceil-d128.c: ceil.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-floor-d32: test-floor-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-floor-d32.c: floor.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-floor-d64: test-floor-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-floor-d64.c: floor.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-floor-d128: test-floor-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-floor-d128.c: floor.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-nearbyint-d32: test-nearbyint-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-nearbyint-d32.c: nearbyint.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-nearbyint-d64: test-nearbyint-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-nearbyint-d64.c: nearbyint.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-nearbyint-d128: test-nearbyint-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-nearbyint-d128.c: nearbyint.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-round-d32: test-round-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-round-d32.c: round.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-round-d64: test-round-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-round-d64.c: round.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-round-d128: test-round-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-round-d128.c: round.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-roundeven-d32: test-roundeven-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-roundeven-d32.c: roundeven.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-roundeven-d64: test-roundeven-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-roundeven-d64.c: roundeven.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-roundeven-d128: test-roundeven-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-roundeven-d128.c: roundeven.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-trunc-d32: test-trunc-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-trunc-d32.c: trunc.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-trunc-d64: test-trunc-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-trunc-d64.c: trunc.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-trunc-d128: test-trunc-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-trunc-d128.c: trunc.input
 	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
 
 DISTCLEANFILES = $(top_builddir)/debug-test.conf

@@ -190,7 +190,7 @@ extern int __issignalingd32 (_Decimal32 __value) __THROW __attribute__ ((__const
 extern int issignalingd32 (_Decimal32 __value) __THROW __attribute__ ((__const__));
 
 extern int fpclassifyd32 (_Decimal32 __value) __THROW __attribute__ ((__const__));
-extern int __fpclassify32 (_Decimal32 __value) __THROW __attribute__ ((__const__));
+extern int __fpclassifyd32 (_Decimal32 __value) __THROW __attribute__ ((__const__));
 
 /* Deprecated but older uses of math.h may have invocations of these if they
  * used the polymorphic finite().  */
@@ -448,7 +448,7 @@ extern int __issignalingd64 (_Decimal64 __value) __THROW __attribute__ ((__const
 extern int issignalingd64 (_Decimal64 __value) __THROW __attribute__ ((__const__));
 
 extern int fpclassifyd64 (_Decimal64 __value) __THROW __attribute__ ((__const__));
-extern int __fpclassify64 (_Decimal64 __value) __THROW __attribute__ ((__const__));
+extern int __fpclassifyd64 (_Decimal64 __value) __THROW __attribute__ ((__const__));
 
 /* Deprecated but older uses of math.h may have invocations of these if they
  * used the polymorphic finite().  */
@@ -706,7 +706,7 @@ extern int __issignalingd128 (_Decimal128 __value) __THROW __attribute__ ((__con
 extern int issignalingd128 (_Decimal128 __value) __THROW __attribute__ ((__const__));
 
 extern int fpclassifyd128 (_Decimal128 __value) __THROW __attribute__ ((__const__));
-extern int __fpclassify128 (_Decimal128 __value) __THROW __attribute__ ((__const__));
+extern int __fpclassifyd128 (_Decimal128 __value) __THROW __attribute__ ((__const__));
 
 /* Deprecated but older uses of math.h may have invocations of these if they
  * used the polymorphic finite().  */

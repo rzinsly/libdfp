@@ -120,6 +120,8 @@ class DecimalType(Type):
     # 1E-DEC_MIN_EXP -> 1E-383
     if "DEC_MAX_EXP" in arg:
       arg = arg.replace ("DEC_MAX_EXP", DECIMAL.maxexp)
+    if "DEC_MIN_EXP_SUB" in arg:
+      arg = arg.replace ("DEC_MIN_EXP_SUB", DECIMAL.minexpsub)
     if "DEC_MIN_EXP" in arg:
       arg = arg.replace ("DEC_MIN_EXP", DECIMAL.minexp)
     # Macro fox max, min, tiny values
@@ -159,7 +161,7 @@ DecimalTypes = {
                              "DEC32_MIN",
                              "DEC32_SUBNORMAL_MIN",
                              "90",
-                             "94",
+                             "95",
                              "101",
                              "%.7HgDF",
                              "union ieee754r_Decimal32"),
@@ -173,7 +175,7 @@ DecimalTypes = {
                              "DEC64_MIN",
                              "DEC64_SUBNORMAL_MIN",
                              "369",
-                             "382",
+                             "383",
                              "398",
                              "%.16DgDD",
                              "union ieee754r_Decimal64"),
@@ -187,7 +189,7 @@ DecimalTypes = {
                               "DEC128_MIN",
                               "DEC128_SUBNORMAL_MIN",
                               "6111",
-                              "6142",
+                              "6143",
                               "6176",
                               "%.34DDgDL",
                               "union ieee754r_Decimal128")

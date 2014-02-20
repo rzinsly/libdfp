@@ -315,14 +315,15 @@ $(top_builddir)/libdfp.map: $(top_builddir)/sysd-versions
 
 GLIBC_LIBS := -lc -lm
 
-libdfp_c_tests = test-printf test-param test-amort test-decode test-quantize \
+libdfp_c_tests = test-printf test-param test-amort test-decode \
 		 test-logd \
 		 test-log10d test-strtod test-numdigits test-get_digits \
 		 test-round test-bfp-conversions test-stdlib test-wchar \
 		 test-expd test-GCC-PR52140 test-getexp test-left_justify \
-		 test-negate test-rounding \
+		 test-negate \
 		 test-fpclassify-d32 test-fpclassify-d64 test-fpclassify-d128 \
 		 test-quantum-d32 test-quantum-d64 test-quantum-d128 \
+                 test-quantize-d32 test-quantize-d64 test-quantize-d128 \
 		 test-samequantum-d32 test-samequantum-d64 test-samequantum-d128 \
 		 test-logb-d32 test-logb-d64 test-logb-d128 \
 		 test-llquantexp-d32 test-llquantexp-d64 test-llquantexp-d128 \
@@ -382,6 +383,32 @@ test-fpclassify-d64.c: fpclassify.input
 test-fpclassify-d128: test-fpclassify-d128.os
 	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
 test-fpclassify-d128.c: fpclassify.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-logb-d32: test-logb-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-logb-d32.c: logb.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-logb-d64: test-logb-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-logb-d64.c: logb.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-logb-d128: test-logb-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-logb-d128.c: logb.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
+
+test-quantize-d32: test-quantize-d32.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-quantize-d32.c: quantize.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
+test-quantize-d64: test-quantize-d64.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-quantize-d64.c: quantize.input
+	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
+test-quantize-d128: test-quantize-d128.os
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
+test-quantize-d128.c: quantize.input
 	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
 
 test-quantum-d32: test-quantum-d32.os

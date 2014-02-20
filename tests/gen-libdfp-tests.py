@@ -78,7 +78,7 @@ class IntegerType(Type):
 
 class DecimalType(Type):
   # Regular expression to check for integer numbers and DEC[32|64|128]_[MAX|MIN]
-  intnum_re = re.compile("(-?[0-9]+$)|(-?DEC.*_(MAX|MIN))")
+  intnum_re = re.compile("([-|+]?[0-9]+$)|(-?DEC.*_(MAX|MIN))")
 
   SPECIAL_ARGS = {
     "Inf"     : "plus_infty",

@@ -5,7 +5,7 @@
  Inf                    Inf
 -Inf                   -Inf
  NaN                    NaN
-sNaN                    sNaN
+sNaN                    NaN
  0.0                    0.0
 -0.0                   -0.0
 

@@ -149,7 +149,7 @@ ulp (FLOAT value)
         break;
 
       case FP_NORMAL:
-        ulp = FUNC(ldexp) (1.0DF, FUNC(ilogb) (value) - (MANT_DIG));
+        ulp = FUNC(ldexp) (1.0DF, FUNC(ilogb) (value) - (MANT_DIG) - 1);
         break;
 
       default:

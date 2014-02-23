@@ -22,14 +22,15 @@
 #include <ieee754r_private.h>
 
 _Decimal32
-__fabsd32 (_Decimal32 val)
+__fabsd32 (_Decimal32 x)
 {
   /* Both binary32 and decimal32 have the sign bit at same position,
      so the instruction works for both format.  */
-  _Decimal64 tmp = val;
-  asm ("dctdp %0, %0\n"  /* DFP Convert To DFP Long  */
+  _Decimal64 tmp;
+  asm ("dctdp %0, %1\n"  /* DFP Convert To DFP Long  */
        "fabs  %0, %0\n"
-       : "=&f"(tmp));
+       : "=&f"(tmp)
+       : "f" (x));
   return (_Decimal32)tmp;
 }
 hidden_def (__fabsd32)

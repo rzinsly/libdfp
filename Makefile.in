@@ -196,7 +196,6 @@ first:
 $(dfp_backend)/$(dfp_backend_lib):
 	@echo "+Building DFP backend $@"
 	DEFS="-D__STDC_DEC_FP__=200704L $(mzarch) $(BACKEND_CFLAGS)" $(MAKE) -C $(dfp_backend)
-	@echo
 
 libdfp: @enable_static@ @enable_shared@
 
@@ -217,24 +216,19 @@ CXX_WARNS := -W -Wall -Wwrite-strings -Wmissing-format-attribute -Wno-long-long
 # Build the static object files.
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(mzarch) -c $< $(C_DEFINES) $(WARNS) -include $(top_srcdir)/include/libdfp-symbols.h -include $(top_builddir)/config.h $(foreach dir, $(header_search_dirs), -I$(dir)) -o $@
-	@echo
 .S.o:
 	$(CC) $(CFLAGS) $(ASFLAGS) $(mzarch) -c $< $(ASM_DEFINES) $(WARNS) -include $(top_srcdir)/include/libdfp-symbols.h -include $(top_builddir)/config.h $(foreach dir, $(header_search_dirs), -I$(dir)) -o $@
-	@echo
 
 # Build the shared object files.
 .c.os:
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(mzarch) -c $< $(C_DEFINES) $(WARNS) -include $(top_srcdir)/include/libdfp-symbols.h -include $(top_builddir)/config.h $(foreach dir, $(header_search_dirs), -I$(dir)) -o $@
-	@echo
 
 .S.os:
 	$(CC) $(CFLAGS) $(ASFLAGS) $(mzarch) -c $< $(ASM_DEFINES) $(WARNS) -include $(top_srcdir)/include/libdfp-symbols.h -include $(top_builddir)/config.h $(foreach dir, $(header_search_dirs), -I$(dir)) -o $@
-	@echo
 
 # C++ compatibility test cases.
 .cpp.os:
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(mzarch) -c $< $(CXX_DEFINES) $(CXX_WARNS) -include $(top_srcdir)/include/libdfp-symbols.h -include $(top_builddir)/config.h $(foreach dir, $(header_search_dirs), -I$(dir)) -o $@
-	@echo
 
 # Archive the static library and include all of the .o files from the backend
 # archive.  IF the backend has more than the base directory the .o detection
@@ -245,13 +239,11 @@ $(top_builddir)/$(STATIC_LIB): $(dfp_backend)/$(dfp_backend_lib) $(addsuffix .o,
 	@ranlibpath=`which $(RANLIB)`; \
 	if test -x "$$ranlibpath"; \
 	then $(RANLIB) $@; fi;
-	@echo
 
 # Create libdfp.so -> libdfp.so.1 symlink.
 $(top_builddir)/$(SHARED_LINKERNAME_LIB): $(top_builddir)/$(SHARED_REALNAME_LIB)
 	@echo "+Creating linker .so symlink $(notdir $@) -> $(notdir $<)"
 	ln -f -s $< $@
-	@echo
 
 # Create libdfp.so.1 -> libdfp-1.0.1.so symlink.
 # The $(SHARED_SONAME_LIB) -> $(SHARED_REALNAME_LIB) symlink is supposed to
@@ -259,7 +251,6 @@ $(top_builddir)/$(SHARED_LINKERNAME_LIB): $(top_builddir)/$(SHARED_REALNAME_LIB)
 $(top_builddir)/$(SHARED_SONAME_LIB): $(top_builddir)/$(SHARED_REALNAME_LIB)
 	@echo "+Running ldconfig to create the library compat symlink $(notdir $@) -> $(notdir $<)"
 	$(LDCONFIG) -l $(notdir $<)
-	@echo
 
 # Build the version tagged 'realname' shared object.  This requires that the
 # $(dfp_name).map file be composed out of individual Versions files.  The
@@ -268,7 +259,6 @@ $(top_builddir)/$(SHARED_SONAME_LIB): $(top_builddir)/$(SHARED_REALNAME_LIB)
 $(top_builddir)/$(SHARED_REALNAME_LIB): $(top_builddir)/$(dfp_name).map $(dfp_backend)/$(dfp_backend_lib) $(addsuffix .os,$(libdfp_files))
 	@echo +Linking shared object files into $@.
 	$(CC) $(CFLAGS) $(mzarch) -shared -Wl,-soname,$(SHARED_SONAME_LIB) -Bsymbolic -Wl,--whole-archive $(dfp_backend)/$(dfp_backend_lib) -Wl,--no-whole-archive -Wl,--version-script,$(dfp_name).map -Wl,-entry=__libdfp_version $(addsuffix .os,$(libdfp_files)) -o $@ -lm
-	@echo
 
 # The LIBDFP version script support is strongly based upon the GLIBC version
 # script Makefile foo.  Thank you Roland McGrath and Ulrich Drepper!
@@ -279,7 +269,6 @@ $(top_builddir)/Versions.all: $(..)scripts/firstversions.awk \
 	@echo +Creating $@ by running $(word 1,$^) against $(word 2,$^).
 	{ cat $(word 2,$^); } | LC_ALL=C $(AWK) -f $< > $@T
 	mv -f $@T $@
-	@echo
 
 # Versions.sysdeps is a concatenation of all of the sysdep directory Versions
 # files (that accompany a Makefile) and run through sed to strip comments.  We
@@ -290,7 +279,6 @@ $(top_builddir)/Versions.sysdeps: $(top_srcdir)/Versions $(wildcard $(makefile_d
 	@echo +Scrubbing the following Versions files for comments and concatenating into a single $@ file.
 	sed '/^[        ]*%/!s/#.*$$//;/^[      ]*$$/d;s/^[     ]*%/#/' $^ > $@T
 	mv -f $@T $@
-	@echo
 
 move-if-change = $(SHELL) $(top_srcdir)/scripts/move-if-change
 
@@ -307,7 +295,6 @@ $(top_builddir)/sysd-versions: $(top_builddir)/Versions.all \
 			    -f $(word 3,$^) \
 	) > $@T
 	mv $@T $@
-	@echo
 
 # This rule causes sysd-versions to be generated, which in turn invokes
 # versions.awk which generates libdfp.map implicitly.
@@ -316,14 +303,17 @@ $(top_builddir)/libdfp.map: $(top_builddir)/sysd-versions
 GLIBC_LIBS := -lc -lm
 
 libdfp_c_tests = test-printf test-amort test-decode \
-		 test-logd \
+		 test-strtod test-numdigits test-get_digits \
 		 test-fenv test-bfp-conversions test-wchar \
-		 test-expd test-getexp test-left_justify \
+		 test-getexp test-left_justify \
 		 test-fpclassify-d32 test-fpclassify-d64 test-fpclassify-d128 \
 		 test-quantum-d32 test-quantum-d64 test-quantum-d128 \
                  test-quantize-d32 test-quantize-d64 test-quantize-d128 \
 		 test-samequantum-d32 test-samequantum-d64 test-samequantum-d128 \
+		 test-exp-d32 test-exp-d64 test-exp-d128 \
 		 test-log-d32 test-log-d64 test-log-d128 \
+		 test-log10-d32 test-log10-d64 test-log-d128 \
+		 test-logb-d32 test-logb-d64 test-logb-d128 \
 		 test-llquantexp-d32 test-llquantexp-d64 test-llquantexp-d128 \
 		 test-isnan-d32 test-isnan-d64 test-isnan-d128 \
 		 test-isinf-d32 test-isinf-d64 test-isinf-d128 \
@@ -346,13 +336,20 @@ test-printf.os: $(top_builddir)/printf_dfp.os
 test-strtod.os: $(top_builddir)/strtod32.os $(top_builddir)/strtod64.os $(top_builddir)/strtod128.os
 
 # Empty rule which simply makes the libdfp_tests .so's dependent on
-# tests/scaffold.c so that when the scaffold file changes all of the test .so
+# tests/libdfp-test.c so that when the libdfp-test file changes all of the test .so
 # files are rebuilt since almost all of them depend on the scaffold anyway.
-$(addsuffix .os, $(libdfp_tests)): $(top_srcdir)/tests/scaffold.c
+$(addsuffix .os, $(libdfp_tests)): $(top_srcdir)/tests/libdfp-test.c
 
 # The CPP test rely on the <dfp/decimal> header.  If that changes then they
 # need to be rebuilt.
 $(addsuffix .os, $(libdfp_cxx_tests)): $(top_srcdir)/dfp/decimal/decimal $(top_srcdir)/dfp/float.h
+
+# Add the ULP file generation explicity rule
+$(addprefix $(objpfx), $(libdfp_tests)): $(top_builddir)/libdfp-test-ulps.h
+
+ulps-file = $(shell find $(sysdep_dirs:%=$(top_srcdir)/%/libdfp-test-ulps))
+$(top_builddir)/libdfp-test-ulps.h: $(ulps-file)
+	$(top_srcdir)/tests/gen-libdfp-ulps.py $< -o $@
 
 # Explicitly link against the uninstalled GLIBC and the libdfp.so.1 we just
 # built.
@@ -370,253 +367,15 @@ $(libdfp_cxx_tests): %:%.os $(top_builddir)/$(SHARED_SONAME_LIB)
 $(addsuffix .out,$(libdfp_tests)): %.out:% %.gdb
 	LD_LIBRARY_PATH=$(top_builddir)/:$$LD_LIBRARY_PATH $(top_builddir)/$(patsubst %.out,%,$@) 2> $(top_builddir)/$@ 1> /dev/null
 
-test-fpclassify-d32: test-fpclassify-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-fpclassify-d32.c: fpclassify.input
+test-%-d%: $(addsuffix .os,$@)
+	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$^ -o $@
+test-%-d32.c: %.input
 	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-fpclassify-d64: test-fpclassify-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-fpclassify-d64.c: fpclassify.input
+test-%-d64.c: %.input
 	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-fpclassify-d128: test-fpclassify-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-fpclassify-d128.c: fpclassify.input
+test-%-d128.c: %.input
 	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-logb-d32: test-logb-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-logb-d32.c: logb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-logb-d64: test-logb-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-logb-d64.c: logb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-logb-d128: test-logb-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-logb-d128.c: logb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-quantize-d32: test-quantize-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-quantize-d32.c: quantize.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-quantize-d64: test-quantize-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-quantize-d64.c: quantize.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-quantize-d128: test-quantize-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-quantize-d128.c: quantize.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-quantum-d32: test-quantum-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-quantum-d32.c: quantum.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-quantum-d64: test-quantum-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-quantum-d64.c: quantum.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-quantum-d128: test-quantum-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-quantum-d128.c: quantum.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-samequantum-d32: test-samequantum-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-samequantum-d32.c: samequantum.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-samequantum-d64: test-samequantum-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-samequantum-d64.c: samequantum.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-samequantum-d128: test-samequantum-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-samequantum-d128.c: samequantum.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-ilogb-d32: test-ilogb-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ilogb-d32.c: ilogb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-ilogb-d64: test-ilogb-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ilogb-d64.c: ilogb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-ilogb-d128: test-ilogb-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ilogb-d128.c: ilogb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-llogb-d32: test-llogb-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-llogb-d32.c: llogb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-llogb-d64: test-llogb-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-llogb-d64.c: llogb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-llogb-d128: test-llogb-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-llogb-d128.c: llogb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-llquantexp-d32: test-llquantexp-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-llquantexp-d32.c: llquantexp.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-llquantexp-d64: test-llquantexp-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-llquantexp-d64.c: llquantexp.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-llquantexp-d128: test-llquantexp-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-llquantexp-d128.c: llquantexp.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-isnan-d32: test-isnan-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isnan-d32.c: isnan.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-isnan-d64: test-isnan-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isnan-d64.c: isnan.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-isnan-d128: test-isnan-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isnan-d128.c: isnan.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-isinf-d32: test-isinf-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isinf-d32.c: isinf.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-isinf-d64: test-isinf-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isinf-d64.c: isinf.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-isinf-d128: test-isinf-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isinf-d128.c: isinf.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-isfinite-d32: test-isfinite-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isfinite-d32.c: isfinite.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-isfinite-d64: test-isfinite-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isfinite-d64.c: isfinite.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-isfinite-d128: test-isfinite-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-isfinite-d128.c: isfinite.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-issignaling-d32: test-issignaling-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-issignaling-d32.c: issignaling.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-issignaling-d64: test-issignaling-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-issignaling-d64.c: issignaling.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-issignaling-d128: test-issignaling-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-issignaling-d128.c: issignaling.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-ilogdb-d32: test-ilogdb-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ilogdb-d32.c: ilogdb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-ilogdb-d64: test-ilogdb-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ilogdb-d64.c: ilogdb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-ilogdb-d128: test-ilogdb-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ilogdb-d128.c: ilogdb.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-ceil-d32: test-ceil-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ceil-d32.c: ceil.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-ceil-d64: test-ceil-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ceil-d64.c: ceil.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-ceil-d128: test-ceil-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-ceil-d128.c: ceil.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-floor-d32: test-floor-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-floor-d32.c: floor.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-floor-d64: test-floor-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-floor-d64.c: floor.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-floor-d128: test-floor-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-floor-d128.c: floor.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-nearbyint-d32: test-nearbyint-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-nearbyint-d32.c: nearbyint.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-nearbyint-d64: test-nearbyint-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-nearbyint-d64.c: nearbyint.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-nearbyint-d128: test-nearbyint-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-nearbyint-d128.c: nearbyint.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-round-d32: test-round-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-round-d32.c: round.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-round-d64: test-round-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-round-d64.c: round.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-round-d128: test-round-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-round-d128.c: round.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-roundeven-d32: test-roundeven-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-roundeven-d32.c: roundeven.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-roundeven-d64: test-roundeven-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-roundeven-d64.c: roundeven.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-roundeven-d128: test-roundeven-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-roundeven-d128.c: roundeven.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
-test-trunc-d32: test-trunc-d32.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-trunc-d32.c: trunc.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal32 $^ > $(top_builddir)/$@
-test-trunc-d64: test-trunc-d64.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-trunc-d64.c: trunc.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal64 $^ > $(top_builddir)/$@
-test-trunc-d128: test-trunc-d128.os
-	$(CC) $(CFLAGS) $(mzarch) $(GLIBC_LIBS) -L$(top_builddir)/ -ldfp $(top_builddir)/$(addsuffix .os,$@) -o $@
-test-trunc-d128.c: trunc.input
-	$(top_srcdir)/tests/gen-libdfp-tests.py -t decimal128 $^ > $(top_builddir)/$@
-
+	
 DISTCLEANFILES = $(top_builddir)/debug-test.conf
 
 # The following rules are defined in Makefile.gdb:

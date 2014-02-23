@@ -82,15 +82,6 @@ class DecimalType(Type):
   # Regular expression to check for integer numbers and DEC[32|64|128]_[MAX|MIN]
   intnum_re = re.compile("([-|+]?[0-9]+$)|(-?DEC.*_(MAX|MIN))")
 
-  SPECIAL_ARGS = {
-    "Inf"     : "plus_infty",
-    "-Inf"    : "minus_infty",
-    "sNaN"    : "snan_value",
-    "-sNaN"   : "snan_value",
-    "NaN"     : "qnan_value",
-    "-NaN"    : "qnan_value"
-  }
-
   def __init__(self, name, type, tname = "", suffix = "", decfield = "",
                maxvalue = "", minvalue = "", subnormal = "", maxexp = "",
                minexp = "", minexpsub = "", printf = "", argtype = ""):
@@ -112,12 +103,14 @@ class DecimalType(Type):
       self.argtype = argtype
 
   def parse_arg (self, arg):
-    # sNAN value
-    if arg == "sNaN":
-      return "{ .ieee_nan = {.c = 0x1f,.signaling_nan = 1 } }"
-    # Infinity or NaN value
-    if arg in self.SPECIAL_ARGS:
-      return "{ .%s = %s }" % (DECIMAL.decfield, self.SPECIAL_ARGS[arg])
+    # NAN values
+    if "NaN" in arg:
+      return "{ .ieee_nan = { .c = 0x1f, .signaling_nan = %d, .negative = %d } }" \
+             % (int("s" in arg), int("-" in arg))
+    # Infinity
+    if "Inf" in arg:
+      prefix = "minus" if ("-" in arg) else "plus"
+      return "{ .%s = %s_infty }" % (DECIMAL.decfield, prefix)
     # Replace <number>E[+-]DEC_[MAX|MIN]_EXP by a expected number, i.e,
     # 1E-DEC_MIN_EXP -> 1E-383
     if "DEC_MAX_EXP" in arg:

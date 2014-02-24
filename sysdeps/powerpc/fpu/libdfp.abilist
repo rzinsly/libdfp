@@ -73,6 +73,7 @@ LIBDFP_1.0.0
  __dpd_truncsdsf F
  __dpd_trunctddd2 F
  __dpd_trunctddf F
+ __dpd_trunctdsd2 F
  __dpd_trunctdsf F
  __dpd_trunctdtf F
  __dpd_trunctfdd F

@@ -26,12 +26,10 @@ __copysignd128 (_Decimal128 x, _Decimal128 y)
 {
   /* Half part os decimal128 constainst the sign bit at same position as
      binary64, so the instruction works for both formats.  */
-  register _Decimal128 xinput asm("fr0") = x;
-  register _Decimal128 yinput asm("fr2") = y;
   _Decimal128 ret;
   asm ("fcpsgn %0,%1,%2\n"
        : "=d"(ret)
-       : "d"(yinput), "d"(xinput));
+       : "d"(y), "d"(x));
   return ret;
 }
 weak_alias (__copysignd128, copysignd128)

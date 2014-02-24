@@ -10,5 +10,7 @@ sNaN               1
 DEC_SUBNORMAL_MIN  0
 DEC_MIN            0
 DEC_MAX            0
+0.0                0
+-0.0               0
 0.1                0
 10E1               0

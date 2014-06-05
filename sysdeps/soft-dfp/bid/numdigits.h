@@ -375,7 +375,7 @@ left_justifyd32 (_Decimal32 x)
 {
   int firstdigit = 0, len;
   char digits[8+7] = { 0 };
-
+  
   __get_digits_d32 (x, digits, NULL, NULL, NULL, NULL);
   while (digits[firstdigit] == '0')
     firstdigit++;
@@ -385,7 +385,15 @@ left_justifyd32 (_Decimal32 x)
       int exp = getexpd32 (x);
       /* pad the significant digits with enough trailing zeroes */
       if ((exp - firstdigit) < -DECIMAL32_Bias)
-	firstdigit = DECIMAL32_Bias + exp;
+        {
+	  firstdigit = DECIMAL32_Bias + exp;
+	  /* If the number overflows the data it will become a NaN. */
+          if ((exp - firstdigit) <= -DECIMAL32_Bias && firstdigit != 0)
+            {
+              union ieee754r_Decimal32 mask = { .si = 0x7c000001 };
+              return mask.sd;
+           }
+        }
       memset (digits + firstdigit + len, '0', firstdigit);
       x = setdigitsd32 (x, digits + firstdigit);
       x = setexpd32 (x, exp - firstdigit);
@@ -409,7 +417,16 @@ left_justifyd64 (_Decimal64 x)
       int exp = getexpd64 (x);
       /* pad the significant digits with enough trailing zeroes */
       if ((exp - firstdigit) < -DECIMAL64_Bias)
-	firstdigit = DECIMAL64_Bias + exp;
+        {
+	  firstdigit = DECIMAL64_Bias + exp;
+	  /* If the number overflows the data it will become a NaN. */
+          if ((exp - firstdigit) <= -DECIMAL64_Bias && firstdigit != 0)
+            {
+              union ieee754r_Decimal64 mask = { .di = { 0x00000001, 
+                                                        0x7c000000 } };
+              return mask.dd;
+           }
+        }
       memset (digits + firstdigit + len, '0', firstdigit);
       x = setdigitsd64 (x, digits + firstdigit);
       x = setexpd64 (x, exp - firstdigit);
@@ -433,7 +450,16 @@ left_justifyd128 (_Decimal128 x)
       int exp = getexpd128 (x);
       /* pad the significant digits with enough trailing zeroes */
       if ((exp - firstdigit) < -DECIMAL128_Bias)
-	firstdigit = DECIMAL128_Bias + exp;
+        {
+	  firstdigit = DECIMAL128_Bias + exp;
+	  /* If the number overflows the data it will become a NaN. */
+          if ((exp - firstdigit) <= -DECIMAL128_Bias && firstdigit != 0)
+            {
+              union ieee754r_Decimal128 mask = { .ti = { 0x00000001, 0x0, 0x0,
+                                                        0x7c000000 } };
+              return mask.td;
+            }
+        }
       memset(digits + firstdigit + len, '0', firstdigit);
       x = setdigitsd128 (x, digits + firstdigit);
       x = setexpd128 (x, exp - firstdigit);

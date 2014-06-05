@@ -55,7 +55,12 @@ __get_digits_d32 (_Decimal32 x, char *str, int *exp_p, int *sign_p,
   d.sd = x;
   c_f = c_decoder[d.nan.nan];
 
-  if (d.divided.c != 3)
+  if (c_f.is_nan)
+    {
+      exp = 0;
+      result = 1;
+    }
+  else if (d.divided.c != 3)
     {
       exp = (d.si >> 23) & 0xFF;    // 8 bits.
       result = d.si & 0x7FFFFFUl;   // 23 bits.
@@ -106,8 +111,13 @@ __get_digits_d64 (_Decimal64 x, char *str, int *exp_p, int *sign_p,
 
   d.dd = x;
   c_f = c_decoder[d.nan.nan];
-
-  if (d.divided.c != 3)
+  
+  if (c_f.is_nan)
+    {
+      exp = 0;
+      result = 1;
+    }
+  else if (d.divided.c != 3)
     {
       exp = (d.di[1] >> 21) & 0x3FF;	// 10 bits.
       result  = d.di[1] & 0x1FFFFF;	// 21 bits.
@@ -159,7 +169,13 @@ __get_digits_d128 (_Decimal128 x, char *str, int *exp_p, int *sign_p,
   d.td = x;
   c_f = c_decoder[d.nan.nan];
 
-  if (d.divided.c != 3)
+  if (c_f.is_nan)
+    {
+      exp = 0;
+      result[1] = 0;
+      result[0] = 1;
+    }
+  else if (d.divided.c != 3)
     {
       exp = (d.ti[3] >> 17) & 0x3FFF;	// 14 bits.
       result[1]  = d.ti[3] & 0x1FFFF;	// 17 bits.

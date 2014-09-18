@@ -1,3 +1,7 @@
+2014-09-18  Raphael Moreira Zinsly  <rzinsly@linux.vnet.ibm.com>
+
+	* configure.ac : Fixed the build with cross compiler.
+
 2014-09-12  Raphael Moreira Zinsly  <rzinsly@linux.vnet.ibm.com>
 
 	* libdecnumber/decUInt128.h (uQuadInitFromUInt) : Fixed the
